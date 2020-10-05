@@ -1,0 +1,2 @@
+01 : Naučenie sa nových funkcií ako open () read() write() close() lseek() flags() a základných príznakov ako O_WRONLY O_RDWRO_RDONLY
+02 : Naučenie novej zložky st_nlink a nových príznakov ako O_CREAT O_EXCEL a O_APPEND
