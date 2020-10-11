@@ -20,7 +20,7 @@
 
 ## 3. týždeň
 ### Report
-- 
+- Dokončenie pretestu č.4, študovanie sofie
 ### Otázky
 - 
 
