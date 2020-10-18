@@ -14,7 +14,7 @@
 
 ## 4. týždeň
 ### Report
-- 
+- kontrola hodnot prepinacov, osetrenie vytvorenie subora ak neexistuje, prekopirovanie obsahu suboru a fatalerror implementovanie 
 ### Otázky
 - 
 
