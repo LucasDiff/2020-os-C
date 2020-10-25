@@ -8,7 +8,7 @@
 
 ## 5. týždeň
 ### Report
-- 
+- prečisťovanie a úpravy kódu
 ### Otázky
 - 
 
