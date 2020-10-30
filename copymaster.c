@@ -254,7 +254,61 @@ struct CopymasterOptions cpm_options = ParseCopymasterOptions(argc, argv);
     else
         FatalError('d', "SUBOR NEBOL ZMAZANY", 26);
     }
+    else if (cpm_options.chmod) {
+        int decimal_chmod_mode = atoi(argv[2]);
+         
+		  mode_t chmod_mode = cpm_options.chmod_mode;
+    int c = 0;
+    int prvy = c;
+    if (decimal_chmod_mode < 1 || decimal_chmod_mode > 777)
+        FatalError('m', "ZLE PRAVA", -1);
 
+    prvy = open(cpm_options.infile, O_RDONLY);
+    int druhy = open(cpm_options.outfile, O_WRONLY);
+
+    if (openfailure(prvy, druhy))
+        FatalError('m', "INA CHYBA", -1);
+
+    int size = getInfileSize(cpm_options);
+    char buff[size];
+
+    if (read(prvy, &buff, size) == -1 ||  write(druhy, &buff, size) == -1)
+        FatalError('m', "INA CHYBA", -1);
+
+    close(prvy);
+    close(druhy);
+
+    chmod(cpm_options.outfile, chmod_mode);
+    }
+    else if (cpm_options.inode) {
+        struct stat st;
+    int c = 0;
+    stat(cpm_options.infile, &st);
+    int prvy = c;
+
+
+    if (cpm_options.inode_number != st.st_ino)
+        FatalError('i', "ZLY INODE", 27);
+
+    if (!S_ISREG(st.st_mode))
+        FatalError('i', "ZLY TYP VSTUPNEHO SUBORU", 27);
+
+     prvy = open(cpm_options.infile, O_RDONLY);
+    int druhy = open(cpm_options.outfile, O_WRONLY);
+
+    if (openfailure(prvy, druhy))
+        FatalError('i', "INA CHYBA", 27);
+
+    int velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+
+    if (read(prvy, &buff, velkost) == -1 ||  write(druhy, &buff, velkost) == -1)
+        FatalError('i', "INA CHYBA", 27);
+
+    close(prvy);
+    close(druhy);
+
+    }
   
     
 
