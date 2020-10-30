@@ -199,6 +199,65 @@ struct CopymasterOptions cpm_options = ParseCopymasterOptions(argc, argv);
     close(druhy);
     }
 
+    else if (cpm_options.lseek){
+           int prvy = open(cpm_options.infile, O_RDONLY);
+           int druhy = open(cpm_options.outfile, O_WRONLY);
+
+    if (openfailure(prvy, druhy))
+	{
+        FatalError('l', "INA CHYBA", 33);
+    }
+    
+    int velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+
+    lseek(prvy,cpm_options.lseek_options.pos1,SEEK_SET);
+
+    if( cpm_options.lseek_options.x == 0 ) 
+        lseek(druhy, cpm_options.lseek_options.pos2, SEEK_SET);
+    if( cpm_options.lseek_options.x == 1 ) 
+        lseek(druhy, cpm_options.lseek_options.pos2, SEEK_END);
+    if( cpm_options.lseek_options.x == 2 ) 
+        lseek(druhy, cpm_options.lseek_options.pos2, SEEK_CUR);
+
+    if (read(prvy, &buff, velkost) == -1 ||  write(druhy, &buff, velkost) == -1)
+        FatalError('l', "INA CHYBA", 33);
+
+    close(prvy);
+    close(druhy);
+    }    
+    if (cpm_options.delete_opt){
+        
+    int c = 0;
+    int velkost = c;
+    int prvy = open(cpm_options.infile, O_RDONLY);
+    int druhy = open(cpm_options.outfile, O_WRONLY);
+
+    if (openfailure(prvy, druhy))
+        FatalError('d', "INA CHYBA", 26);
+
+    velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+
+    if (read(prvy, &buff, velkost) == -1 ||  write(druhy, &buff, velkost) == -1)
+        FatalError('d', "INA CHYBA", 26);
+    
+    close(prvy);
+    close(druhy);
+
+    struct stat st;
+
+    stat(cpm_options.outfile, &st);
+
+    if (S_ISREG(st.st_mode))
+        remove(cpm_options.infile);
+    else
+        FatalError('d', "SUBOR NEBOL ZMAZANY", 26);
+    }
+
+  
+    
+
     if (cpm_options.fast && cpm_options.slow && c == 0) {
         fprintf(stderr, "CHYBA PREPINACOV\n"); 
         exit(EXIT_FAILURE);
@@ -290,4 +349,3 @@ bool controlCopyRegular(struct CopymasterOptions cpm_options) {
 bool fileExists(int fileSize) {
     return fileSize > 0;
 }
-
