@@ -142,6 +142,63 @@ struct CopymasterOptions cpm_options = ParseCopymasterOptions(argc, argv);
     close(prvy);
     close(druhy);
     }
+    
+    else if (cpm_options.append)
+	{
+        if (!fileExists(getOutfileSize(cpm_options)))
+		{
+        FatalError('a', "SUBOR NEEXISTUJE", 22);
+    }
+    
+    int prvy = open(cpm_options.infile, O_RDONLY);
+    int druhy = open(cpm_options.outfile, O_WRONLY | O_APPEND, 0644);
+
+    if (openfailure(prvy, druhy))
+	{
+        FatalError('a', "INA CHYBA", 22);
+    }
+    
+    int velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+
+    if (read(prvy, &buff, velkost) == -1 ||  write(druhy, &buff, velkost) == -1)
+	{
+        FatalError('a', "INA CHYBA", 22);
+    }    
+    close(prvy);
+    close(druhy);
+    }
+    
+    else if (cpm_options.overwrite)
+	{
+        
+
+    int    prvy = open(cpm_options.infile, O_RDONLY);
+    int  druhy = open(cpm_options.outfile, O_TRUNC|O_WRONLY);
+    
+    if (errno == 2)
+	{
+        FatalError('o', "SUBOR NEEXISTUJE", 24);
+    }
+    if (openfailure(prvy, druhy))
+	{
+        FatalError('o', "INA CHYBA", 24);
+    }
+    struct stat st;
+    stat(cpm_options.outfile, &st);
+    //mode_t outfileMode = st.st_mode; 
+    int velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+
+    if (read(prvy, &buff, velkost) == -1 ||  write(druhy, &buff, velkost) == -1)
+	{
+        FatalError('o', "INA CHYBA", 24);
+    }
+    
+    close(prvy);
+    close(druhy);
+    }
+
     if (cpm_options.fast && cpm_options.slow && c == 0) {
         fprintf(stderr, "CHYBA PREPINACOV\n"); 
         exit(EXIT_FAILURE);
