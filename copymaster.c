@@ -309,15 +309,57 @@ struct CopymasterOptions cpm_options = ParseCopymasterOptions(argc, argv);
     close(druhy);
 
     }
-  
-    
 
+    if(cpm_options.truncate){
+    int c = 0;
+    int prvy = c;
+    prvy = open(cpm_options.infile, O_RDONLY);
+    int druhy = open(cpm_options.outfile, O_WRONLY);
+    int velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+    if (openfailure(prvy, druhy))
+        FatalError('t', "INA CHYBA", 31);
+
+    if (read(prvy, &buff, velkost) == -1 ||  write(druhy, &buff, velkost) == -1)
+        FatalError('t', "INA CHYBA", 31);
+
+    close(prvy);
+    close(druhy);
+
+    struct stat st;
+    stat(cpm_options.infile, &st);
+    if (!S_ISREG(st.st_mode))
+        FatalError('t', "VSTUPNY SUBOR NEZMENENY", 31);
+        
+    truncate(cpm_options.infile, cpm_options.truncate_size);
+    
+	}
+  else if(cpm_options.link){
+          int c = 0;
+          int prvy = c;
+          prvy = open(cpm_options.infile, O_RDONLY);
+    
+    if(errno == 2){
+        FatalError('K', "VSTUPNY SUBOR NEEXISTUJE", 30);
+    }
+    close(prvy);
+    
+    if(link(cpm_options.infile,cpm_options.outfile) == 0){
+        return 0;
+    }
+    else
+	{
+    	
+        FatalError('K', "VYSTUPNY SUBOR NEVYTVORENY", 30);
+    }
+    }
     if (cpm_options.fast && cpm_options.slow && c == 0) {
         fprintf(stderr, "CHYBA PREPINACOV\n"); 
         exit(EXIT_FAILURE);
     }
     return 0;
 }
+    
 
 
 void FatalError(char c, const char* msg, int exit_status)
