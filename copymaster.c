@@ -29,7 +29,8 @@ bool openfailure(int prvy, int druhy);
 
 int main(int argc, char* argv[]) {
 
-    struct CopymasterOptions cpm_options = ParseCopymasterOptions(argc, argv);
+    
+struct CopymasterOptions cpm_options = ParseCopymasterOptions(argc, argv);
 
     int c = 0;
 
@@ -64,15 +65,87 @@ int main(int argc, char* argv[]) {
     close(prvy);
     close(druhy);
 	}
+    if (cpm_options.fast){
+        int prvy = open(cpm_options.infile, O_RDONLY);
+    int druhy = open(cpm_options.outfile, O_WRONLY);
 
+    if (openfailure(prvy, druhy))
+	{
+        FatalError('f', "INA CHYBA", -1);
+    }
+
+    int velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+
+    if (read(prvy, &buff, velkost) == -1 ||  write(druhy, &buff, velkost) == -1)
+	{
+        FatalError('f', "INA CHYBA", -1);
+    }
+    
+    close(prvy);
+    close(druhy);
+    }
+    else if (cpm_options.slow)
+	{
+    int prvy = open(cpm_options.infile, O_RDONLY),
+    druhy = open(cpm_options.outfile, O_WRONLY);
+
+    if (openfailure(prvy, druhy))
+	{
+
+    FatalError('s', "INA CHYBA", -1);
+	}
+    int i;
+    int velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+
+    while((i = read(prvy, &buff, 1)))
+	{
+        if (i == -1 || write(druhy, &buff, 1) == -1){
+        FatalError('s', "INA CHYBA", -1);
+        }
+    }
+    
+    close(prvy);
+    close(druhy);
+    ;
+    }
+    else if (cpm_options.create)
+	 { 
+	 mode_t create_mode = cpm_options.create_mode;
+
+    if (create_mode < 1 || create_mode > 777)
+	{
+        FatalError('c', "ZLE PRAVA", 23);
+    }
+
+    if (fileExists(getOutfileSize(cpm_options)))
+	{
+        FatalError('c', "SUBOR EXISTUJE", 23);
+    }
+    
+    int prvy = open(cpm_options.infile, O_RDONLY),
+    druhy = open(cpm_options.outfile, O_WRONLY | O_CREAT, create_mode);
+
+    if (openfailure(prvy, druhy))
+	{
+        FatalError('c', "INA CHYBA", 23);
+    }    
+    int velkost = getInfileSize(cpm_options);
+    char buff[velkost];
+
+    if (read(prvy, &buff, velkost) == -1 || write(druhy, &buff, velkost) == -1)
+	{
+        FatalError('c', "INA CHYBA", 23);
+    }
+
+    close(prvy);
+    close(druhy);
+    }
     if (cpm_options.fast && cpm_options.slow && c == 0) {
         fprintf(stderr, "CHYBA PREPINACOV\n"); 
         exit(EXIT_FAILURE);
     }
-    if (cpm_options.directory) {
-        // TODO Implementovat vypis adresara
-    }
-    
     return 0;
 }
 
@@ -141,6 +214,13 @@ int getInfileSize(struct CopymasterOptions cpm_options) {
     return velkost;
 }
 
+int getOutfileSize(struct CopymasterOptions cpm_options) {
+    struct stat st;
+    stat(cpm_options.outfile, &st);
+    int size = st.st_size;
+    return size;
+}
+
 bool controlCopyRegular(struct CopymasterOptions cpm_options) {
 
     return !cpm_options.fast && !cpm_options.slow && !cpm_options.create &&
@@ -153,3 +233,4 @@ bool controlCopyRegular(struct CopymasterOptions cpm_options) {
 bool fileExists(int fileSize) {
     return fileSize > 0;
 }
+
