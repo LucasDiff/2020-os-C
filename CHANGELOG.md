@@ -2,7 +2,7 @@
 
 ## 6. týždeň
 ### Report
-- 
+- dalšia úprava kódu a pridávanie na git
 ### Otázky
 - 
 
